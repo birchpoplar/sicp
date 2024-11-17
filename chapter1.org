@@ -1,0 +1,312 @@
+#+TITLE: SICP Book - Notes & Code
+#+AUTHOR: Johnnie Walker
+#+PROPERTY: header-args :eval yes
+#+PROPERTY: header-args:racket :lang sicp
+
+* Chapter 1 - Building Abstractions with Procedures
+
+** 1.1 Elements of Programming
+
+Simple program to test functionality:
+
+#+begin_src racket :lang sicp
+    (inc 42)
+#+end_src
+
+#+RESULTS:
+: 43
+
+*** 1.1.5 Substitution Model
+
+Applicative-order execution:
+- typical approach for interpreters
+- evaluate the body of the procedure with the formal parameters replaced by the corresponding argument
+- Often has efficiency over the normal-order method as less repetitive execution
+- Lisp uses applicative order execution
+
+Normal-order execution:
+- replace and substitute until no further substitution can be done, then evaluate
+- Can become a lot more complicated when substitution not feasible
+
+*** 1.1.6 Conditional Expressions and Predicates
+
+**** Case and If Statements
+Various conditional expression examples:
+
+#+begin_src racket :lang sicp
+  (define (abs x)
+    (cond ((> x 10) x)
+          ((= x 0) 0)
+          ((< x 0) (- x))))
+
+  (abs 4)
+#+end_src
+
+#+RESULTS:
+: #<void>
+
+#+begin_src racket :lang sicp
+  (define (abs x)
+    (cond ((< x 0) (- x))
+          (else x)))
+  
+  (abs -6)
+#+end_src
+
+#+RESULTS:
+: 6
+
+#+begin_src racket :lang sicp
+  (define (abs x)
+    (if (< x 0)
+        (- x)
+        x))
+
+  (abs -10)
+#+end_src
+
+#+RESULTS:
+: 10
+
+**** Logical Expressions
+
+Tested the exercises in the Racket REPL, couldn't get the less/greater than to work right with C-c C-c...
+
+**** Exercise 1.1
+#+begin_src racket :lang sicp
+  10
+
+  (+ 5 3 4)
+
+  (- 9 1)
+
+  (/ 6 2)
+
+  (+ (* 2 4) (- 4 6))
+
+  (define a 3)
+
+  (define b (+ a 1))
+
+  (+ a b (* a b))
+
+  (< a b)
+
+  (if (and (> b a) (< b (* a b))
+#+end_src
+
+#+RESULTS:
+: /tmp/babel-Be0pUM/org-babel-t8ctaR.rkt:3:7: read-syntax: expected a `)` to close `(`
+:   possible cause: indentation suggests a missing `)` before line 5
+:   context...:
+:    /usr/share/racket/collects/syntax/module-reader.rkt:214:17: body
+:    /usr/share/racket/collects/syntax/module-reader.rkt:211:2: wrap-internal
+:    .../syntax/module-reader.rkt:76:9: wrap-internal/wrapper
+**** Exercise 1.2
+
+#+begin_src racket :lang sicp
+
+(/ (+ 5 4 (- 2 (- 3 (+ 6 (/ 4 5))))) (* 3 (- 6 2) (- 2 7)))
+  
+#+end_src
+
+#+RESULTS:
+: -37/150
+
+**** Exercise 1.3
+
+#+begin_src racket
+  (define (sumsq a b)
+    (+ (* a a) (* b b)))
+
+  (define (sumbigs x y z)
+    (cond ((and (< x y) (< x z)) (sumsq y z))
+          ((and (< y x) (< y z)) (sumsq x z))
+          ((and (< z x) (< z y)) (sumsq y z))))
+
+  (sumbigs 1 3 5)
+#+end_src
+
+#+RESULTS:
+: 34
+
+**** Exercise 1.4
+
+#+begin_src racket :lang sicp
+  (define (a-plus-abs-b a b)
+    ((if (> b 0) + - ) a b))
+
+  (a-plus-abs-b 1 -2)
+#+end_src
+
+#+RESULTS:
+: 3
+
+This works as the if statement checks for ~b~ as greater than zero, if it is then the '+' operator is applied to the arguments ~a~ and ~b~, otherwise the '-' operator is applied)
+
+**** Exercise 1.5
+The point being made here is with normal-order evaluation the ~(p)~ will never be successfully evaluated (a continuous loop), and so ~(test 0 (p))~ will not evaluate.
+However, with applicative-order evaluation the substitution and execution allows completion:
+#+begin_src racket :lang sicp
+  (test 0 (p))
+  (if (= 0 0)
+      0
+      (p))
+#+end_src
+This will successfully complete with return value of ~0~.
+**** TODO Exercise 1.6
+**** TODO Exercise 1.7
+**** TODO Exercise 1.8
+*** 1.1.7 Example: Square Roots by Newton's Method
+
+*Principle*: In mathematics we are usually concerned with the declarative description, whereas in computer science we are concerned with the imperative description. One defines properties, the other describes how to do things.
+
+#+begin_src racket :lang sicp
+  (define (sqrt-iter guess x)
+    (if (good-enough? guess x)
+        guess
+        (sqrt-iter (improve guess x)
+                   x)))
+
+  (define (improve guess x)
+    (average guess (/ x guess)))
+
+  (define (average x y)
+    (/ (+ x y) 2))
+
+  (define (good-enough? guess x)
+    (< (abs (- (square guess) x)) 0.001))
+
+  (define (sqrt x)
+    (sqrt-iter 1.0 x))
+
+  (define (square x)
+    (* x x))
+
+    (sqrt (+ 100 37))
+
+
+#+end_src
+
+#+RESULTS:
+: 11.704699917758145
+
+*** 1.1.8 Procedures as Black Box Abstractions
+
+Decomposition is the breaking down of a problem into subproblems.
+
+The crucial aspect is to break down into procedures that accomplish a specifically defined tasks such that they can be used by other procedures. It then abstracts the /how/ and we're concerned only with the /what/.
+
+*Bound variables* are formal parameters for which their use is independent of their name. The bound variable has scope within the procedure that binds it.
+
+If a variable is not bound it is free.
+
+*Therefore, the formal parameters of a procedure are local to that procedure.*
+
+Using a *block structure* it is possible to nest definitions within a procedure. This then avoids proliferation of multiple similar and possibly (probably) conflicting subprocedures across an application.
+
+*Block structure* also allows lexical scoping (or enables lexical scoping) such that commonly referenced or passed variables can be free within the scope of the block strucure, and not visible outwith the structure. The solves for the name-packaging problem, where conflicting names for different variables can (and frequently would) occur.
+
+*Recursive process*: characterized by a chain of deferred processes, an interpreter must keep track of the processes to be completed later on. If the amount of information needing tracked increases linearly with the function parameter then it is a /linearly recursive process/.
+
+*Iterative process*: this is one where maintaining the state requires knowledge of a series of state variables. Using those variables you can re-create any particular stage or stages of the process. SImilarly if the number of iterations grows linearly with the function parameter then it is a /linearly iterative process/.
+
+Iterative processes can be restarted just by knowing the value of the state variables. Recursive processes require the full chain to occur.
+
+A recursive procedure is one that refers to itself. Such a procedure may still result in an iterative process.
+
+**** Exercise 1.9
+#+begin_src racket :lang sicp
+
+  # Probably recursive
+
+  (define (+ a b)
+    (if (= a 0)
+        b
+        (inc (+ (dec a) b))))
+
+  (+ 4 5)
+  (inc (+ (3) 5))
+  (inc (inc (+ (2) 5)))
+  (inc (inc (inc (+ (1) 5))))
+  (inc (inc (inc (inc (5)))))
+  (inc (inc (inc (6))))
+  (inc (inc (7)))
+  (inc (8))
+  (9)
+
+  # Probably iterative
+
+  (define (+ a b)
+    (if (= a 0)
+        b
+        (+ (dec a) (inc b))))
+
+  (+ 4 5)
+  (+ 3 6)
+  (+ 2 7)
+  (+ 1 8)
+  (9)
+
+#+end_src
+
+*Q*: is the differentiator between an iterative and recursive process of a recursive procedure the fact that in a recursive process the self-referenced procedure is itself a parameter? In the above, the iterative process results from recursion where the procedure is replicated without any function application, whereas the recursive process results when there is function application to the self-referenced function (in other words, the self-referenced function is a parameter).
+
+**** Exercise 1.10
+
+#+begin_src racket :lang sicp
+
+  (define (A x y)
+    (cond ((= y 0) 0)
+          ((= x 0) (* 2 y))
+          ((= y 1) 2)
+          (else (A (- x 1)
+                   (A x (- y 1))))))
+
+  (A 1 10)
+  (A 0 (A 1 9))
+  (A 0 (A 0 (A 1 8)))
+  (A 0 (A 0 (A 0 (A 1 7))))
+  (A 0 (A 0 (A 0 (A 0 (A 1 6)))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 5))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 4)))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 3))))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 2)))))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 1))))))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (2))))))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (4)))))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (8))))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (16)))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (32))))))
+  (A 0 (A 0 (A 0 (A 0 (64)))))
+  (A 0 (A 0 (A 0 (128))))
+  (A 0 (A 0 (256)))
+  (A 0 (512))
+  (1024)
+
+  (A 2 4)
+  (A 1 (A 2 3))
+  (A 1 (A 1 (A 2 2)))
+  (A 1 (A 1 (A 1 (A 2 1))))
+  (A 1 (A 1 (A 1 2)))
+  (A 1 (A 1 (A 0 (A 1 1))))
+  (A 1 (A 1 (2 * 2)))
+  (A 1 (A 1 4))
+  (A 1 (A 0 (A 1 3)))
+  (A 1 (A 0 (A 0 (A 1 2))))
+  (A 1 (A 0 (A 0 (A 0 (A 1 1)))))
+  (A 1 (A 0 (A 0 (A 0 (2)))))
+  (A 1 (A 0 (A 0 (4))))
+  (A 1 (A 0 (8)))
+  (A 1 (16))
+  (A 0 (A 1 15))
+  (A 0 (A 0 (A 1 14)))
+  (A 0 (A 0 (A 0...)))
+  ...
+  65536
+
+  (A 3 3)
+  ...
+  65536
+
+#+end_src
