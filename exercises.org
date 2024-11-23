@@ -1,0 +1,340 @@
+#+TITLE: SICP Book - Exercises
+#+AUTHOR: Johnnie Walker
+#+PROPERTY: header-args :eval yes
+#+PROPERTY: header-args:racket :lang sicp
+
+* Chapter 1 Exercises
+
+** Exercise 1.1
+#+begin_src racket :lang sicp
+  10
+
+  (+ 5 3 4)
+
+  (- 9 1)
+
+  (/ 6 2)
+
+  (+ (* 2 4) (- 4 6))
+
+  (define a 3)
+
+  (define b (+ a 1))
+
+  (+ a b (* a b))
+
+  (< a b)
+
+  (if
+   (and
+    (> b a)
+    (< b (* a b)))
+   b
+   a)
+
+  (cond ((= a 4) 6)
+        ((= b 4) (+ 6 7 a))
+        (else 25))
+
+#+end_src
+
+#+RESULTS:
+: 16
+** Exercise 1.2
+
+#+begin_src racket :lang sicp
+
+(/ (+ 5 4 (- 2 (- 3 (+ 6 (/ 4 5))))) (* 3 (- 6 2) (- 2 7)))
+  
+#+end_src
+
+#+RESULTS:
+: -37/150
+
+** Exercise 1.3
+
+#+begin_src racket
+  (define (sumsq a b)
+    (+ (* a a) (* b b)))
+
+  (define (sumbigs x y z)
+    (cond ((and (< x y) (< x z)) (sumsq y z))
+          ((and (< y x) (< y z)) (sumsq x z))
+          ((and (< z x) (< z y)) (sumsq y z))))
+
+  (sumbigs 11 3 5)
+  
+#+end_src
+
+#+RESULTS:
+: 146
+
+** Exercise 1.4
+
+#+begin_src racket :lang sicp
+  (define (a-plus-abs-b a b)
+    ((if (> b 0) + - ) a b))
+
+  (a-plus-abs-b 1 -30)
+#+end_src
+
+#+RESULTS:
+: 31
+
+This works as the if statement checks for ~b~ as greater than zero, if it is then the '+' operator is applied to the arguments ~a~ and ~b~, otherwise the '-' operator is applied)
+
+** Exercise 1.5
+The ~(define (p) (p)~ is a recursive definition that will never end, will always just call itself.
+
+The point being made here is with normal-order evaluation the ~(p)~ will never be successfully evaluated (a continuous loop), and so ~(test 0 (p))~ will not evaluate.
+
+However, with applicative-order evaluation the substitution and execution allows completion:
+
+#+begin_src racket :lang sicp
+
+  (define (p) (p))
+
+  (test 0 (p))
+
+    (if (= 0 0)
+        0
+        (p))
+#+end_src
+
+#+RESULTS:
+: /tmp/babel-p6qJOT/org-babel-xgBrFk.rkt:8:1: test: unbound identifier
+:   in: test
+:   location...:
+:    /tmp/babel-p6qJOT/org-babel-xgBrFk.rkt:8:1
+
+This will successfully complete with return value of ~0~.
+
+#+BEGIN_QUOTE
+*Applicative vs. Normal Order Evaluation*
+Applicative Order (Eager Evaluation):
+- Arguments to functions are evaluated before the function is applied.
+- This means all subexpressions are computed as soon as they are encountered.
+Normal Order (Lazy Evaluation):
+- Arguments to functions are not evaluated until their values are needed.
+- Subexpressions are deferred and evaluated only if they affect the final result.
+#+END_QUOTE
+
+** Exercise 1.6
+
+Exercise demonstrates the difference in evaluation between ~if~ and ~cond~. ~if~ only evaluates whichever branch is dictated by the predicate. Whereas in the ~cond~ the interpreter eagerly evaluates all arguments.
+
+#+begin_src racket
+
+  ;; DO NOT RUN, GETS STUCK IN RECURSION LOOP
+
+  (define (new-if predicate then-clause else-clause)
+    (cond (predicate then-clause)
+          (else else-clause)))
+
+  (new-if (= 2 3) 0 5)
+
+  (define (improve guess x)
+    (average guess (/ x guess)))
+
+  (define (average x y)
+    (/ (+ x y) 2))
+
+  (define (square x)
+    (* x x))
+
+  (define (good-enough? guess x)
+    (< (abs (- (square guess) x)) 0.001))
+
+  (define (sqrt-iter guess x)
+    (new-if (good-enough? guess x)
+            guess
+            (sqrt-iter (improve guess x)
+                       x)))
+
+  (define (sqrt x)
+    (sqrt-iter 1.0 x))
+
+  (sqrt 9)
+
+#+end_src
+
+#+RESULTS:
+: /tmp/babel-p6qJOT/org-babel-4pmEos.rkt:19:14: square: unbound identifier
+:   in: square
+:   location...:
+:    /tmp/babel-p6qJOT/org-babel-4pmEos.rkt:19:14
+
+By default, gets stuck in recursion loop.
+
+** Exercise 1.7
+
+Improvements:
+- define local variable ~improved_guess~
+- make the ~good-enough?~ test use dynamic precision, i.e. compare to a tolerance based on the scale of the input ~x~
+
+#+begin_src racket :lang sicp
+
+  (define (sqrt-iter guess x)
+    (let ((improved_guess (improve guess x)))
+      (if (good-enough? guess improved_guess x)
+          improved_guess
+          (sqrt-iter improved_guess 
+                     x))))
+
+  (define (improve guess x)
+    (average guess (/ x guess)))
+
+  (define (average x y)
+    (/ (+ x y) 2))
+
+  (define (good-enough? guess improved_guess x)
+    (< (abs (- guess improved_guess))
+       (* 0.000001 guess)))
+
+  (define (sqrt x)
+    (sqrt-iter 1.0 x))
+
+  (define (square x)
+    (* x x))
+
+  (sqrt (+ 100 53))
+
+  (sqrt 200000000000)
+
+#+end_src
+
+#+RESULTS:
+: 447213.595499958
+
+** Exercise 1.8
+
+
+#+begin_src racket
+
+          (define (cubrt-iter guess x)
+            (let ((improved_guess (improve guess x)))
+              (if (good-enough? guess improved_guess x)
+                  improved_guess
+                  (cubrt-iter improved_guess 
+                             x))))
+
+          (define (improve guess x)
+            (/
+             (+
+              (/ x (square guess))
+              (+ 2 guess))
+            3))
+
+          (define (good-enough? guess improved_guess x)
+            (< (abs (- guess improved_guess))
+               (* 0.000000001 guess)))
+
+          (define (cubrt x)
+            (cubrt-iter 1.0 x))
+
+          (define (square x)
+            (* x x))
+
+          (cubrt 24)
+  
+#+end_src
+
+#+RESULTS:
+: 2.6758886687089625
+
+
+** Exercise 1.9
+#+begin_src racket :lang sicp
+
+  # Probably recursive
+
+  (define (+ a b)
+    (if (= a 0)
+        b
+        (inc (+ (dec a) b))))
+
+  (+ 4 5)
+  (inc (+ (3) 5))
+  (inc (inc (+ (2) 5)))
+  (inc (inc (inc (+ (1) 5))))
+  (inc (inc (inc (inc (5)))))
+  (inc (inc (inc (6))))
+  (inc (inc (7)))
+  (inc (8))
+  (9)
+
+  # Probably iterative
+
+  (define (+ a b)
+    (if (= a 0)
+        b
+        (+ (dec a) (inc b))))
+
+  (+ 4 5)
+  (+ 3 6)
+  (+ 2 7)
+  (+ 1 8)
+  (9)
+
+#+end_src
+
+*Q*: is the differentiator between an iterative and recursive process of a recursive procedure the fact that in a recursive process the self-referenced procedure is itself a parameter? In the above, the iterative process results from recursion where the procedure is replicated without any function application, whereas the recursive process results when there is function application to the self-referenced function (in other words, the self-referenced function is a parameter).
+
+** Exercise 1.10
+
+#+begin_src racket :lang sicp
+
+  (define (A x y)
+    (cond ((= y 0) 0)
+          ((= x 0) (* 2 y))
+          ((= y 1) 2)
+          (else (A (- x 1)
+                   (A x (- y 1))))))
+
+  (A 1 10)
+  (A 0 (A 1 9))
+  (A 0 (A 0 (A 1 8)))
+  (A 0 (A 0 (A 0 (A 1 7))))
+  (A 0 (A 0 (A 0 (A 0 (A 1 6)))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 5))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 4)))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 3))))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 2)))))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 1))))))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (2))))))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (4)))))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (8))))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (16)))))))
+  (A 0 (A 0 (A 0 (A 0 (A 0 (32))))))
+  (A 0 (A 0 (A 0 (A 0 (64)))))
+  (A 0 (A 0 (A 0 (128))))
+  (A 0 (A 0 (256)))
+  (A 0 (512))
+  (1024)
+
+  (A 2 4)
+  (A 1 (A 2 3))
+  (A 1 (A 1 (A 2 2)))
+  (A 1 (A 1 (A 1 (A 2 1))))
+  (A 1 (A 1 (A 1 2)))
+  (A 1 (A 1 (A 0 (A 1 1))))
+  (A 1 (A 1 (2 * 2)))
+  (A 1 (A 1 4))
+  (A 1 (A 0 (A 1 3)))
+  (A 1 (A 0 (A 0 (A 1 2))))
+  (A 1 (A 0 (A 0 (A 0 (A 1 1)))))
+  (A 1 (A 0 (A 0 (A 0 (2)))))
+  (A 1 (A 0 (A 0 (4))))
+  (A 1 (A 0 (8)))
+  (A 1 (16))
+  (A 0 (A 1 15))
+  (A 0 (A 0 (A 1 14)))
+  (A 0 (A 0 (A 0...)))
+  ...
+  65536
+
+  (A 3 3)
+  ...
+  65536
+
+#+end_src

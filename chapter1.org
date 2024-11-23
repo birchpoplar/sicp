@@ -10,27 +10,80 @@
 Simple program to test functionality:
 
 #+begin_src racket :lang sicp
-    (inc 42)
+    (inc 45)
 #+end_src
 
 #+RESULTS:
-: 43
+: 46
+
+*Combination*: delimited list of expressions within parentheses to denote procedure application.
+
+*Prefix Notation*: useful when a procedure can take an arbitrary number of arguments. Also allows nesting of procedures.
+
+#+BEGIN_SRC racket
+  (define pi 3.14159)
+  (define radius 10) 
+
+  (* pi (* radius radius))
+
+  (define circumference (* 2 pi radius))
+
+  circumference
+
+#+END_SRC
+
+#+RESULTS:
+: 62.8318
+
+Can evaluate primitive expressions. For example evaluating a numeral is the number it names. Then there are special forms, e.g. ~define~, which associates a name with a value.
+
+*** 1.1.4 Compound Procedures
+Elements of a powerful programming language (as far as we have learnt about Lisp so far):
+1. numbers and arithmetic operations are primitive data and procedures, there is a fundamental ability to represent values and operating on those values
+2. Can combine operations via nesting
+3. Ability to abstract by associating names with values (and operations)
+
+*Syntactic sugar* refers to language features or constructs that make code easier to read or write, without adding new functionality to the language itself. These constructs are "sugar" because they make the syntax "sweeter" for the programmer, improving clarity and reducing verbosity.
 
 *** 1.1.5 Substitution Model
+
+#+begin_src racket
+
+  (define (square x) (* x x))
+
+  (define (sum-of-squares x y)
+    (+ (square x) (square y)))
+
+  (define (f a)
+    (sum-of-squares (+ a 1) (* a 2)))
+
+  (f 5)
+
+#+end_src
+
+#+RESULTS:
+: 136
+
+Substitution model breaks down when used with "mutable data" and procedures.
 
 Applicative-order execution:
 - typical approach for interpreters
 - evaluate the body of the procedure with the formal parameters replaced by the corresponding argument
-- Often has efficiency over the normal-order method as less repetitive execution
+- Often has efficiency over the normal-order method as less repetitive execution (evaluations lead to multiple uses of the resulting value)
 - Lisp uses applicative order execution
 
 Normal-order execution:
 - replace and substitute until no further substitution can be done, then evaluate
 - Can become a lot more complicated when substitution not feasible
 
+Normal-order = fully expand and then reduce.
+Applicative-order = evaluate the arguments and then apply.
+
 *** 1.1.6 Conditional Expressions and Predicates
 
 **** Case and If Statements
+Sequence of predicates and expressions. The predicates are evaluated until one is found true and then the consequent expression value returned.
+
 Various conditional expression examples:
 
 #+begin_src racket :lang sicp
@@ -56,6 +109,8 @@ Various conditional expression examples:
 #+RESULTS:
 : 6
 
+~if~ is a special restricted type of conditional that can be used when precisely two cases in the case analysis exist or are needed.
+
 #+begin_src racket :lang sicp
   (define (abs x)
     (if (< x 0)
@@ -68,98 +123,17 @@ Various conditional expression examples:
 #+RESULTS:
 : 10
 
+Built in ~if~ is a special form. Based on the result of the predicate it only evaluates one of the two branches.
+
 **** Logical Expressions
 
-Tested the exercises in the Racket REPL, couldn't get the less/greater than to work right with C-c C-c...
+Tested the exercises in the Racket REPL. See exercises
 
-**** Exercise 1.1
-#+begin_src racket :lang sicp
-  10
-
-  (+ 5 3 4)
-
-  (- 9 1)
-
-  (/ 6 2)
-
-  (+ (* 2 4) (- 4 6))
-
-  (define a 3)
-
-  (define b (+ a 1))
-
-  (+ a b (* a b))
-
-  (< a b)
-
-  (if (and (> b a) (< b (* a b))
-#+end_src
-
-#+RESULTS:
-: /tmp/babel-Be0pUM/org-babel-t8ctaR.rkt:3:7: read-syntax: expected a `)` to close `(`
-:   possible cause: indentation suggests a missing `)` before line 5
-:   context...:
-:    /usr/share/racket/collects/syntax/module-reader.rkt:214:17: body
-:    /usr/share/racket/collects/syntax/module-reader.rkt:211:2: wrap-internal
-:    .../syntax/module-reader.rkt:76:9: wrap-internal/wrapper
-**** Exercise 1.2
-
-#+begin_src racket :lang sicp
-
-(/ (+ 5 4 (- 2 (- 3 (+ 6 (/ 4 5))))) (* 3 (- 6 2) (- 2 7)))
-  
-#+end_src
-
-#+RESULTS:
-: -37/150
-
-**** Exercise 1.3
-
-#+begin_src racket
-  (define (sumsq a b)
-    (+ (* a a) (* b b)))
-
-  (define (sumbigs x y z)
-    (cond ((and (< x y) (< x z)) (sumsq y z))
-          ((and (< y x) (< y z)) (sumsq x z))
-          ((and (< z x) (< z y)) (sumsq y z))))
-
-  (sumbigs 1 3 5)
-#+end_src
-
-#+RESULTS:
-: 34
-
-**** Exercise 1.4
-
-#+begin_src racket :lang sicp
-  (define (a-plus-abs-b a b)
-    ((if (> b 0) + - ) a b))
-
-  (a-plus-abs-b 1 -2)
-#+end_src
-
-#+RESULTS:
-: 3
-
-This works as the if statement checks for ~b~ as greater than zero, if it is then the '+' operator is applied to the arguments ~a~ and ~b~, otherwise the '-' operator is applied)
-
-**** Exercise 1.5
-The point being made here is with normal-order evaluation the ~(p)~ will never be successfully evaluated (a continuous loop), and so ~(test 0 (p))~ will not evaluate.
-However, with applicative-order evaluation the substitution and execution allows completion:
-#+begin_src racket :lang sicp
-  (test 0 (p))
-  (if (= 0 0)
-      0
-      (p))
-#+end_src
-This will successfully complete with return value of ~0~.
-**** TODO Exercise 1.6
-**** TODO Exercise 1.7
-**** TODO Exercise 1.8
 *** 1.1.7 Example: Square Roots by Newton's Method
 
 *Principle*: In mathematics we are usually concerned with the declarative description, whereas in computer science we are concerned with the imperative description. One defines properties, the other describes how to do things.
+
+*Note*: with AI code generation, feasible for high-level languages to be declerative, and leave the actual how-to or imperative programming to the AI.
 
 #+begin_src racket :lang sicp
   (define (sqrt-iter guess x)
@@ -184,7 +158,6 @@ This will successfully complete with return value of ~0~.
     (* x x))
 
     (sqrt (+ 100 37))
-
 
 #+end_src
 
@@ -215,98 +188,19 @@ Iterative processes can be restarted just by knowing the value of the state vari
 
 A recursive procedure is one that refers to itself. Such a procedure may still result in an iterative process.
 
-**** Exercise 1.9
-#+begin_src racket :lang sicp
-
-  # Probably recursive
-
-  (define (+ a b)
-    (if (= a 0)
-        b
-        (inc (+ (dec a) b))))
-
-  (+ 4 5)
-  (inc (+ (3) 5))
-  (inc (inc (+ (2) 5)))
-  (inc (inc (inc (+ (1) 5))))
-  (inc (inc (inc (inc (5)))))
-  (inc (inc (inc (6))))
-  (inc (inc (7)))
-  (inc (8))
-  (9)
-
-  # Probably iterative
-
-  (define (+ a b)
-    (if (= a 0)
-        b
-        (+ (dec a) (inc b))))
-
-  (+ 4 5)
-  (+ 3 6)
-  (+ 2 7)
-  (+ 1 8)
-  (9)
-
+* Template for LaTeX figure in source block
+#+name: circle
+#+header: :results file drawer
+#+header: :file circle.png
+#+header: :imagemagick yes
+#+header: :headers '("\\usepackage{tikz}")
+#+begin_src latex
+  \begin{tikzpicture}
+      \fill[red] (0,0) circle (3cm);
+    \end{tikzpicture}
 #+end_src
 
-*Q*: is the differentiator between an iterative and recursive process of a recursive procedure the fact that in a recursive process the self-referenced procedure is itself a parameter? In the above, the iterative process results from recursion where the procedure is replicated without any function application, whereas the recursive process results when there is function application to the self-referenced function (in other words, the self-referenced function is a parameter).
-
-**** Exercise 1.10
-
-#+begin_src racket :lang sicp
-
-  (define (A x y)
-    (cond ((= y 0) 0)
-          ((= x 0) (* 2 y))
-          ((= y 1) 2)
-          (else (A (- x 1)
-                   (A x (- y 1))))))
-
-  (A 1 10)
-  (A 0 (A 1 9))
-  (A 0 (A 0 (A 1 8)))
-  (A 0 (A 0 (A 0 (A 1 7))))
-  (A 0 (A 0 (A 0 (A 0 (A 1 6)))))
-  (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 5))))))
-  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 4)))))))
-  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 3))))))))
-  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 2)))))))))
-  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 1 1))))))))))
-  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (2))))))))))
-  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (4)))))))))
-  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (8))))))))
-  (A 0 (A 0 (A 0 (A 0 (A 0 (A 0 (16)))))))
-  (A 0 (A 0 (A 0 (A 0 (A 0 (32))))))
-  (A 0 (A 0 (A 0 (A 0 (64)))))
-  (A 0 (A 0 (A 0 (128))))
-  (A 0 (A 0 (256)))
-  (A 0 (512))
-  (1024)
-
-  (A 2 4)
-  (A 1 (A 2 3))
-  (A 1 (A 1 (A 2 2)))
-  (A 1 (A 1 (A 1 (A 2 1))))
-  (A 1 (A 1 (A 1 2)))
-  (A 1 (A 1 (A 0 (A 1 1))))
-  (A 1 (A 1 (2 * 2)))
-  (A 1 (A 1 4))
-  (A 1 (A 0 (A 1 3)))
-  (A 1 (A 0 (A 0 (A 1 2))))
-  (A 1 (A 0 (A 0 (A 0 (A 1 1)))))
-  (A 1 (A 0 (A 0 (A 0 (2)))))
-  (A 1 (A 0 (A 0 (4))))
-  (A 1 (A 0 (8)))
-  (A 1 (16))
-  (A 0 (A 1 15))
-  (A 0 (A 0 (A 1 14)))
-  (A 0 (A 0 (A 0...)))
-  ...
-  65536
-
-  (A 3 3)
-  ...
-  65536
-
-#+end_src
+#+RESULTS: circle
+:results:
+[[file:circle.png]]
+:end:
