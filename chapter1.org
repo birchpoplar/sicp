@@ -180,27 +180,123 @@ Using a *block structure* it is possible to nest definitions within a procedure.
 
 *Block structure* also allows lexical scoping (or enables lexical scoping) such that commonly referenced or passed variables can be free within the scope of the block strucure, and not visible outwith the structure. The solves for the name-packaging problem, where conflicting names for different variables can (and frequently would) occur.
 
+** 1.2 Procedures & Processes
+*** 1.2.1 Linear Recursion and Iteration
 *Recursive process*: characterized by a chain of deferred processes, an interpreter must keep track of the processes to be completed later on. If the amount of information needing tracked increases linearly with the function parameter then it is a /linearly recursive process/.
 
-*Iterative process*: this is one where maintaining the state requires knowledge of a series of state variables. Using those variables you can re-create any particular stage or stages of the process. SImilarly if the number of iterations grows linearly with the function parameter then it is a /linearly iterative process/.
+*Iterative process*: this is one where maintaining the state requires knowledge of a series of state variables. Using those variables you can re-create any particular stage or stages of the process. Similarly if the number of iterations grows linearly with the function parameter then it is a /linearly iterative process/.
 
 Iterative processes can be restarted just by knowing the value of the state variables. Recursive processes require the full chain to occur.
 
 A recursive procedure is one that refers to itself. Such a procedure may still result in an iterative process.
 
-* Template for LaTeX figure in source block
-#+name: circle
+*A recursive procedure* is one where the procedure definition refers to the procedure itself, it's a syntactic reference. _A recursive procedure may generate either a recursive or iterative process_.
+
+*Tail Recursion*
+Tail recursion is a special kind of recursion where the recursive call is the last operation in the function. This means that once the recursive call is made, there is no further computation needed in the current function frame. Because of this, the current function frame can be discarded, making tail recursion as efficient as a loop in terms of memory usage.
+
+The recursive call is the final operation:
+- No additional operations (like additions, multiplications, etc.) are performed after the recursive call.
+- This allows the program to "reuse" the current stack frame instead of allocating a new one.
+
+
+Tail recursion is indeed an efficient form of recursion where the recursive call is the last operation in the function. This allows for optimization by reusing the current stack frame, making it as memory efficient as a loop. For a function to be tail recursive, no computations should occur after the recursive call, ensuring that the stack does not grow with each call.
+_Example of tail recursion (from ChatGPT):_
+
+  #+begin_src racket
+
+    (define (factorial n)
+      (define (iter acc n)
+        (if (= n 0)
+            acc
+            (iter (* acc n) (- n 1))))
+      (iter 1 n))
+
+    (factorial 4)
+
+  #+end_src
+
+  #+RESULTS:
+  : 24
+
+*** 1.2.2 Tree Recursion
+In general, the number of steps required in a tree-recursive process will be proportional to the number of nodes in a tree. Whereas the space required will be proportional to the maximum depth of the tree. The reason for the latter is that you move through the tree sequentially as the process completes, so the required storage space will fluctuate as you move up and down the branches of the tree.
+
+*Fibonacci*
+A linear iterative process, as well as a recursive procedure. Insight here was to use a pair of integers, initialized to ~Fib(1) = 1~ and ~Fib(0) = 0~. And then use the following transformations: 
+~a <-- a + b~
+~b <-- a~
+
+#+begin_src racket
+
+  (define (fib n)
+    (fib-iter 1 0 n))
+
+  (define (fib-iter a b count)
+    (if (= count 0)
+        b
+        (fib-iter (+ a b) a (- count 1))))
+
+  (fib 11)
+
+#+end_src
+
+#+RESULTS:
+: 89
+
+*Example: Counting Change*
+
+#+begin_src racket
+
+  (define (count-change amount)
+    (cc amount 5))
+
+  (define (cc amount kinds-of-coins)
+    (cond ((= amount 0) 1)
+          ((or (< amount 0) (= kinds-of-coins 0)) 0)
+          (else (+ (cc amount
+                       (- kinds-of-coins 1))
+                   (cc (- amount
+                          (first-denomination kinds-of-coins))
+                       kinds-of-coins)))))
+
+  (define (first-denomination kinds-of-coins)
+    (cond ((= kinds-of-coins 1) 1)
+          ((= kinds-of-coins 2) 5)
+          ((= kinds-of-coins 3) 10)
+          ((= kinds-of-coins 4) 25)
+          ((= kinds-of-coins 5) 50)))
+
+  (count-change 10)
+
+#+end_src
+
+#+RESULTS:
+: 4
+
+*ChatGPT* The code defines a procedure =count-change= that calculates the number of ways to make change for a given amount of money using coins of different denominations: 1, 5, 10, 25, and 50 cents. The =cc= function uses a recursive process to consider two scenarios: using the first kind of coin or not using it and continuing with the rest. The result shows that there are 4 ways to make change for 10 cents using these denominations.
+
+#+name: cc-tree
 #+header: :results file drawer
-#+header: :file circle.png
+#+header: :file cc-tree.png
 #+header: :imagemagick yes
 #+header: :headers '("\\usepackage{tikz}")
 #+begin_src latex
-  \begin{tikzpicture}
-      \fill[red] (0,0) circle (3cm);
-    \end{tikzpicture}
+
+\begin{tikzpicture}
+  \node {cc 10 2}
+    child {node {cc 10 1\\=1}}
+    child {node {cc 5 2}
+      child {node {cc 5 1\\=1}}
+      child {node {cc 0 2\\=1}}
+    };
+\end{tikzpicture}
+  
 #+end_src
 
-#+RESULTS: circle
+#+RESULTS: cc-tree
 :results:
-[[file:circle.png]]
+[[file:cc-tree.png]]
 :end:
+
+

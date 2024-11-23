@@ -4,7 +4,6 @@
 #+PROPERTY: header-args:racket :lang sicp
 
 * Chapter 1 Exercises
-
 ** Exercise 1.1
 #+begin_src racket :lang sicp
   10
@@ -208,7 +207,6 @@ Improvements:
 
 ** Exercise 1.8
 
-
 #+begin_src racket
 
           (define (cubrt-iter guess x)
@@ -222,7 +220,7 @@ Improvements:
             (/
              (+
               (/ x (square guess))
-              (+ 2 guess))
+              (* 2 guess))
             3))
 
           (define (good-enough? guess improved_guess x)
@@ -235,13 +233,12 @@ Improvements:
           (define (square x)
             (* x x))
 
-          (cubrt 24)
+          (cubrt 27)
   
 #+end_src
 
 #+RESULTS:
-: 2.6758886687089625
-
+: 3.0
 
 ** Exercise 1.9
 #+begin_src racket :lang sicp
@@ -281,6 +278,8 @@ Improvements:
 *Q*: is the differentiator between an iterative and recursive process of a recursive procedure the fact that in a recursive process the self-referenced procedure is itself a parameter? In the above, the iterative process results from recursion where the procedure is replicated without any function application, whereas the recursive process results when there is function application to the self-referenced function (in other words, the self-referenced function is a parameter).
 
 ** Exercise 1.10
+
+Ackermann's function is a classic example of a computationally challenging recursive function that is non-primitive recursive. It grows extraordinarily fast and illustrates the power of recursion in defining functions that exceed the capabilities of simpler iteration-based definitions. It is often used in theoretical computer science to explore the limits of computability and recursion.
 
 #+begin_src racket :lang sicp
 
@@ -338,3 +337,115 @@ Improvements:
   65536
 
 #+end_src
+
+#+RESULTS:
+: /tmp/babel-gAHOhu/org-babel-SW30vf.rkt:51:13: 0...: unbound identifier
+:   in: 0...
+:   location...:
+:    /tmp/babel-gAHOhu/org-babel-SW30vf.rkt:51:13
+
+#+begin_src racket
+
+  (define (A x y)
+    (cond ((= y 0) 0)
+          ((= x 0) (* 2 y))
+          ((= y 1) 2)
+          (else (A (- x 1)
+                   (A x (- y 1))))))
+
+  (A 2 4)
+
+#+end_src
+
+#+RESULTS:
+: 65536
+
+Ackermann's function is an excellent example of a problem that highlights the difference between recursive and iterative processes, a core concept in SICP. Its explosive growth also emphasizes the importance of understanding recursion's implications in both theory and practice.
+
+_(A 1 n)_
+1 1: 2
+1 2: 4
+1 3: 8
+is then 2^n.
+
+_(A 2 n)_
+1 1: 2
+2 2: 4
+2 3: 16
+2 4: 65536
+2 5: HUGE
+Maybe? 2 ^ (n ^ 2)
+1 : 2
+Almost got it, basically nested powers of 2.
+
+** Exercise 1.11
+Recursive process:
+
+#+begin_src racket
+
+  (define (fn-three n)
+    (if (< n 3)
+        n
+        (+ (fn-three (- n 1)) (* 2 (fn-three (- n 2))) (* 3 (fn-three (- n 3))))))
+
+  (fn-three 4)
+
+#+end_src
+
+#+RESULTS:
+: 11
+
+Iterative process:
+
+#+begin_src racket
+
+  (define (fn-three n)
+    (fn-iter 0 1 2 n))
+
+  (define (calculate a b c)
+    (+ c (* 2 b) (* 3 a)))
+     
+  (define (fn-iter a b c count)
+    (if (= count 3)
+        (calculate a b c)
+        (fn-iter b c (calculate a b c) (- count 1))))
+
+  (fn-three 5)
+
+#+end_src
+
+#+RESULTS:
+: 25
+
+** Exercise 1.12
+
+Got a bit too much unplanned help from ChatGPT on this one. But key step was to see this first as just calculating a given element based on a row and column number.
+
+#+begin_src racket
+
+  (define (pascal r c)
+    (cond ((or (= c 0) (= c r)) 1)
+          (else (+
+                 (pascal (- r 1) (- c 1))
+                 (pascal (- r 1) c)))))
+
+  (pascal 4 2)
+
+#+end_src
+
+#+RESULTS:
+: 6
+
+From ChatGPT:
+
+The =pascal= function computes the elements of Pascal's Triangle. In Pascal's Triangle, each element is the sum of the two directly above it. The function uses recursion to compute this.
+
+When you call =(pascal 4 2)=, it calculates the value at row 4, column 2 of Pascal’s Triangle using these steps:
+
+1. =pascal(3, 1) + pascal(3, 2)=
+2. =pascal(2, 0) + pascal(2, 1) + pascal(2, 1) + pascal(2, 2)=
+3. This further breaks down to =1 + (pascal(1, 0) + pascal(1, 1)) + (pascal(1, 0) + pascal(1, 1)) + 1=
+4. Which simplifies to =1 + (1 + 1) + (1 + 1) + 1=
+5. Leading to =1 + 2 + 2 + 1= = 6
+
+Thus, =pascal(4, 2)= returns 6, which is the value at row 4, column 2 of Pascal’s Triangle.
