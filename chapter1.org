@@ -299,4 +299,7 @@ A linear iterative process, as well as a recursive procedure. Insight here was t
 [[file:cc-tree.png]]
 :end:
 
+*** 1.2.3 Orders of Growth
+~R(n)~ is the resource required for an operation of size ~n~. A bit of an abstract or flexible concept, but ~R(n)~ can refer to memory size, number of operations performed, etc.
 
+~R(n)~ has order of growth ~Theta(f(n))~. The order of growth is then expressed as a function of ~n~. So the challenge is to find the appropriate ~f(n)~ for a process, it could be ~n~, ~n^2~, ~log(n)~ and so on.

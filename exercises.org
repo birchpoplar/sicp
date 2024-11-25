@@ -449,3 +449,25 @@ When you call =(pascal 4 2)=, it calculates the value at row 4, column 2 of Pasc
 5. Leading to =1 + 2 + 2 + 1= = 6
 
 Thus, =pascal(4, 2)= returns 6, which is the value at row 4, column 2 of Pascal’s Triangle.
+
+** Exercise 1.14
+https://chatgpt.com/share/67446312-fa34-8007-bf16-78f68eedc7ee
+So order of growth is ~2^n~ and steps required grows exponentially.
+
+The trick here is to see that the algorithm calls itself twice in each call, hence the ~2^n~ in the growth as it doubles the number of computations at each step.
+
+#+BEGIN_QUOTE
+At every recursive step (except for base cases), cc calls itself twice:
+Branch 1: Excludes the current coin and works with one fewer kind of coin.
+Branch 2: Includes the current coin, subtracting its value from amount.
+#+END_QUOTE
+
+Depth of the recursion tree depends upon:
+- the amount, as each branch uses the coin denomination to reduce the amount to zero
+- the number of kinds of coins, as branches reduce the number of coin types to reach zero.
+
+A confusing element here is that of branches terminating:
+#+BEGIN_QUOTE
+For example, in cc(-39, 5), the branch terminates immediately because amount < 0. These terminations reduce the total number of recursive calls in practice but do not change the order of growth, as pruning doesn’t prevent the exponential branching overall.
+#+END_QUOTE
+So the termination is specific to actual n, but does not change the overall trend in order of growth of doubling.
