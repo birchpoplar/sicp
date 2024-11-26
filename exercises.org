@@ -471,3 +471,29 @@ A confusing element here is that of branches terminating:
 For example, in cc(-39, 5), the branch terminates immediately because amount < 0. These terminations reduce the total number of recursive calls in practice but do not change the order of growth, as pruning doesn’t prevent the exponential branching overall.
 #+END_QUOTE
 So the termination is specific to actual n, but does not change the overall trend in order of growth of doubling.
+
+** Exercise 1.15
+
+#+begin_src racket
+
+  (define (cube x) (* x x x))
+
+  (define (p x) (- (* 3 x) (* 4 (cube x))))
+
+  (define (sine angle)
+    (if (not (> (abs angle) 0.1))
+        angle
+        (p (sine (/ angle 3.0)))))
+
+  (sine 12.15)
+
+#+end_src
+
+#+RESULTS:
+: -0.39980345741334
+
+Below chat explains how the ~sine~ function is called only once in each iteration. The recursion builds as the ~sine~ function divides the input by 3 until the base case is reached. Then ~p~ is evaluated on the way back up.
+https://chatgpt.com/share/6745362f-4744-8007-876d-1f1d3c1f57fb
+
+Number of times ~p~ applied is 5 (dividing 12.15 by 3)
+Order of growth is then log3(a)
