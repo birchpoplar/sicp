@@ -303,3 +303,34 @@ A linear iterative process, as well as a recursive procedure. Insight here was t
 ~R(n)~ is the resource required for an operation of size ~n~. A bit of an abstract or flexible concept, but ~R(n)~ can refer to memory size, number of operations performed, etc.
 
 ~R(n)~ has order of growth ~Theta(f(n))~. The order of growth is then expressed as a function of ~n~. So the challenge is to find the appropriate ~f(n)~ for a process, it could be ~n~, ~n^2~, ~log(n)~ and so on.
+*** 1.2.4 Exponentiation
+Fast exponential procedure grows at ~Theta(log n)~ rate, as opposed to ~Theta(n)~. The difference between this becomes much more significant as ~n~ grows large.
+
+#+BEGIN_QUOTE
+Intuition for the Invariant
+Imagine that result is like a "bank account" where we’re accumulating the answer, and 
+  is the "remaining debt" we need to compute. The invariant ensures that the combined value of result and the "remaining debt" always equals the original total amount 
+ . Each step reduces the "debt" (either by squaring or decrementing), while appropriately adjusting the "account balance" (the result).
+#+END_QUOTE
+
+#+BEGIN_QUOTE
+Why Does This Matter?
+The invariant ensures correctness by tying the iterative state to the original problem:
+It tells you why the computation works: every step preserves this relationship.
+At the end, when b=0, there’s nothing "left to compute," so the result must be a^n.
+#+END_QUOTE
+
+#+BEGIN_QUOTE
+The iterative process is about finding a more efficient way to calculate a^n.
+- The halving/doubling strategy leads to logarithmic growth in the number of steps.
+- The invariant ensures that, at every step, the algorithm stays true to the original goal, giving us confidence in its correctness and final result.
+#+END_QUOTE
+
+*** 1.2.5 Greatest Common Divisors
+Euclid's algorithm:
+~GCD(a,b) = GCD(b,r)~
+where ~r~ is the remainder from ~a/b~.
+*** 1.2.6 Testing for Primalty
+(Scanned this section)
+** 1.3 Abstractions with Higher-Order Procedures
+

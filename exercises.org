@@ -497,3 +497,44 @@ https://chatgpt.com/share/6745362f-4744-8007-876d-1f1d3c1f57fb
 
 Number of times ~p~ applied is 5 (dividing 12.15 by 3)
 Order of growth is then log3(a)
+
+** Exercise 1.16
+See also notes about the *invariant quantity*,
+
+#+begin_src racket
+(define (fast-expt a b)
+  (define (iter a b result)
+    ;; Invariant: result * (a^b) = a^n
+    (cond ((= b 0) result)  ; Base case: result already holds a^n
+          ((even? b)
+           ;; Preserve invariant: result * ((a^2)^(b/2)) = a^n
+           (iter (* a a) (/ b 2) result))
+          (else
+           ;; Preserve invariant: (result * a) * a^(b-1) = a^n
+           (iter a (- b 1) (* result a)))))
+  ;; Initial state: result = 1, invariant holds as 1 * a^b = a^b
+  (iter a b 1))
+#+end_src
+
+** Exercise 1.17
+
+Defining iterative process with logarithmic growth, vs the standard approach to multiplication of repeated addition, that then has linear growth.
+
+#+begin_src racket
+
+  (define (mult a b)
+    (if (= b 0)
+       0
+       (+ a (mult a (- b 1)))))
+
+  (define (mult2 a b)
+    (cond ((or (= b 0) (= a 0)) 0)
+          ((even? b) (* 2 (mult2 a (/ b 2))))
+          (else (+ a (mult2 a (- b 1))))))
+
+  (mult2 2 10)
+
+#+end_src
+
+#+RESULTS:
+: 20
