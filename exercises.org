@@ -538,3 +538,90 @@ Defining iterative process with logarithmic growth, vs the standard approach to 
 
 #+RESULTS:
 : 20
+
+** Exercise 1.29
+
+#+begin_src racket
+
+  (define (cube x) (* x x x))
+
+  (define (sum term a next b)
+    (if (> a b)
+        0
+        (+ (term a)
+           (sum term (next a) next b))))
+
+  (define (simps f a b n)
+    (define (inc x) (+ x 1))
+    (define h (/ (- b a) n))
+    (define (term k)
+      (* (cond ((or (= k 0) (= k n)) 1)
+               ((even? k) 2)
+               (else 4))
+         (f (+ a (* k h)))))
+    (* (/ h 3)
+       (sum term 0 inc n)))
+
+  (simps cube 0 1.0 1000)
+
+#+end_src
+
+#+RESULTS:
+: 0.2500000000000003
+
+** Exercise 1.30
+
+Note the use of shadowing of ~a~ in the iteration function. It's the same /logical/ entity, and makes sense to repeat its use.
+
+#+begin_src racket
+
+  (define (sum term a next b)
+    (define (iter a result)
+      (if (> a b)
+          result
+          (iter (next a) (+ result (term a)))))
+    (iter a 0))
+
+  (define (identity x) x)
+
+  (define (inc n) (+ n 1))
+
+  (define (sum-integers a b)
+    (sum identity a inc b))
+
+  (sum-integers 1 10)
+
+#+end_src
+
+#+RESULTS:
+: 55
+
+** Exercise 1.31
+
+Trick here is in seeing the factorial calc reversed, such that it is just:
+
+\( fact = 1 * 2 * 3 * ... * (n-2) * (n-1) * n \)
+
+In other words, you count up from 1 to n!!
+
+#+begin_src racket
+
+  (define (product term a next b)
+    (if (> a b)
+        1
+        (* (term a)
+           (product term (next a) next b))))
+
+  (define (inc x) (+ x 1))
+
+  (define (identity x) x)
+
+  (define (factprod n)
+    (product identity 1 inc n))
+
+  (factprod 4)
+
+#+end_src
+
+#+RESULTS:
+: 24
